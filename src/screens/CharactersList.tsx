@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react"
-import { Keyboard, KeyboardEvent, FlatList, Pressable, StyleSheet, View, ActivityIndicator } from "react-native"
+import { FlatList, Pressable, StyleSheet, View, ActivityIndicator } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
-import { CharacterResponse } from "../types/CharactersResponse"
+import { useCharacters } from "../hooks/useCharacters"
+import { useKeyboard } from "../hooks/useKeyboard"
 import { MainStackParams } from "../navigation/MainStack"
 import CharactersService from "../services/CharactersService"
 import CharacterRow from "../components/CharactersList/CharacterRow"
@@ -16,36 +17,19 @@ import { colors } from "../assets/colors"
 type Props = NativeStackScreenProps<MainStackParams, "CharactersList">
 
 const CharactersList = ({ navigation }: Props) => {
-    const [characters, setCharacters] = useState<CharacterResponse[]>([])
-    const [filteredCharacters, setFilteredCharacters] = useState<CharacterResponse[]>([])
+    const [searchText, setSearchText] = useState("")
+    const [characters, setCharacters] = useCharacters(searchText)
     const [page, setPage] = useState(1)
     const [pagesCount, setPagesCount] = useState(0)
-    const [searchText, setSearchText] = useState("")
     const [isLoading, setLoading] = useState(false)
     const [isPageLoading, setPageLoading] = useState(false)
-    const [keyboardHeight, setKeyboardHeight] = useState(0)
     const safeAreaInsets = useSafeAreaInsets()
+    const keyboardHeight = useKeyboard()
 
     useEffect(() => {
-        const showingSubscription = Keyboard.addListener("keyboardDidShow", handleKeyboardShowing)
-        const hidingSubscription = Keyboard.addListener("keyboardDidHide", handleKeyboardHiding)
-
         setupNavBar()
         setLoading(true)
         fetchCharacters(page)
-
-        return () => {
-            showingSubscription.remove()
-            hidingSubscription.remove()
-        }
-    }, [])
-
-    const handleKeyboardShowing = useCallback((event: KeyboardEvent) => {
-        setKeyboardHeight(event.endCoordinates.height)
-    }, [])
-
-    const handleKeyboardHiding = useCallback(() => {
-        setKeyboardHeight(0)
     }, [])
 
     const setupNavBar = useCallback(() => {
@@ -57,7 +41,6 @@ const CharactersList = ({ navigation }: Props) => {
 
         if (response?.data) {
             setCharacters([...characters, ...response.data.results])
-            setFilteredCharacters([...characters, ...response.data.results])
             setPagesCount(response.data.info.pages)
         }
 
@@ -65,13 +48,8 @@ const CharactersList = ({ navigation }: Props) => {
         setPageLoading(false)
     }, [characters, searchText])
 
-    const searchCharacters = useCallback((text: string) => {
-        setFilteredCharacters(characters.filter(character => character.name.toLowerCase().includes(text.toLowerCase())))
-    }, [characters])
-
     const handleInputChanged = useCallback((text: string) => {
         setSearchText(text)
-        searchCharacters(text)
     }, [searchText, characters])
 
     const handleScrollEnding = useCallback(() => {
@@ -109,7 +87,7 @@ const CharactersList = ({ navigation }: Props) => {
             <FlatList
                 style={styles.list}
                 contentInset={{ bottom: keyboardHeight }}
-                data={filteredCharacters}
+                data={characters}
                 renderItem={({ item }) => (
                     <Pressable 
                         onPress={() => navigation.navigate("CharacterInfo", { id: item.id, name: item.name })}
