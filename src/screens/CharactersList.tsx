@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { FlatList, Pressable, StyleSheet, View, ActivityIndicator } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
@@ -7,6 +7,7 @@ import { useCharacters } from "../hooks/useCharacters"
 import { useKeyboard } from "../hooks/useKeyboard"
 import { MainStackParams } from "../navigation/MainStack"
 import CharactersService from "../services/CharactersService"
+import { CharacterResponse } from "../types/CharactersResponse"
 import CharacterRow from "../components/CharactersList/CharacterRow"
 import Input from "../components/common/Input"
 import Spacer from "../components/common/Spacer"
@@ -32,9 +33,47 @@ const CharactersList = ({ navigation }: Props) => {
         fetchCharacters(page)
     }, [])
 
+    const containerStyles = useMemo(() => {
+        return [
+            styles.container, 
+            { 
+                paddingTop: safeAreaInsets.top === 0 ? 15 : safeAreaInsets.top,
+                paddingLeft: safeAreaInsets.left === 0 ? 15 : safeAreaInsets.left,
+                paddingRight: safeAreaInsets.right === 0 ? 15 : safeAreaInsets.right
+            }
+        ]
+    }, [safeAreaInsets])
+
     const setupNavBar = useCallback(() => {
         navigation.setOptions({ headerShown: false })
     }, [])
+
+    const getListItemComponent = useCallback((character: CharacterResponse) => {
+        return (
+            <Pressable 
+                onPress={() => navigation.navigate("CharacterInfo", { id: character.id, name: character.name })}
+            >
+                <CharacterRow 
+                    name={character.name}
+                    image={character.image} 
+                />
+            </Pressable>
+        )
+    }, [])
+
+    const getListSeparatorComponent = useCallback(() => {
+        return <Spacer size={15} />
+    }, [])
+
+    const getListFooterComponent = useCallback(() => {
+        return isPageLoading && page !== pagesCount
+            ? (
+                <View style={styles.pageLoader}>
+                    <ActivityIndicator />
+                </View>
+            )
+            : null
+    }, [isPageLoading, page, pagesCount])
 
     const fetchCharacters = useCallback(async (page: number) => {
         let response = await CharactersService.getCharacters(page)
@@ -68,14 +107,7 @@ const CharactersList = ({ navigation }: Props) => {
 
     return (
         <View 
-            style={[
-                styles.container, 
-                { 
-                    paddingTop: safeAreaInsets.top === 0 ? 15 : safeAreaInsets.top,
-                    paddingLeft: safeAreaInsets.left === 0 ? 15 : safeAreaInsets.left,
-                    paddingRight: safeAreaInsets.right === 0 ? 15 : safeAreaInsets.right
-                }
-            ]}
+            style={containerStyles}
         >
             <Input
                 value={searchText}
@@ -88,29 +120,12 @@ const CharactersList = ({ navigation }: Props) => {
                 style={styles.list}
                 contentInset={{ bottom: keyboardHeight }}
                 data={characters}
-                renderItem={({ item }) => (
-                    <Pressable 
-                        onPress={() => navigation.navigate("CharacterInfo", { id: item.id, name: item.name })}
-                    >
-                        <CharacterRow 
-                            name={item.name}
-                            image={item.image} 
-                        />
-                    </Pressable>
-                )}
+                renderItem={({ item }) => getListItemComponent(item)}
                 keyExtractor={item => String(item.id)}
                 showsVerticalScrollIndicator={false}
                 onEndReached={handleScrollEnding}
-                ListFooterComponent={() => {
-                    return isPageLoading && page !== pagesCount
-                        ? (
-                            <View style={styles.pageLoader}>
-                                <ActivityIndicator />
-                            </View>
-                        )
-                        : null
-                }}
-                ItemSeparatorComponent={() => <Spacer size={15} />}
+                ListFooterComponent={getListFooterComponent}
+                ItemSeparatorComponent={getListSeparatorComponent}
             />
         </View>
     )
