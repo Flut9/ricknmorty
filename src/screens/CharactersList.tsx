@@ -60,7 +60,7 @@ const CharactersList = ({ navigation }: Props) => {
         setPageLoading(true)
         setPage(page + 1)
         fetchCharacters(page + 1)
-    }, [page, isPageLoading, searchText, characters])
+    }, [page, isPageLoading, searchText, fetchCharacters])
 
     if (isLoading) {
         return <Loader />

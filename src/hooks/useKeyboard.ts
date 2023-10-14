@@ -16,11 +16,11 @@ export const useKeyboard = () => {
 
     const handleKeyboardShowing = useCallback((event: KeyboardEvent) => {
         setKeyboardHeight(event.endCoordinates.height)
-    }, [])
+    }, [setKeyboardHeight])
 
     const handleKeyboardHiding = useCallback(() => {
         setKeyboardHeight(0)
-    }, [])
+    }, [setKeyboardHeight])
 
     return keyboardHeight
 }
