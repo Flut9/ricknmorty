@@ -34,7 +34,7 @@ const CharacterInfo = ({ navigation, route }: Props) => {
         }
         
         setIsLoading(false)
-    }, [])
+    }, [setCharacter, setIsLoading])
 
     const routeToBack = useCallback(() => {
         navigation.goBack()

@@ -11,7 +11,7 @@ export const useCharacters = (searchText: string): [CharacterResponse[], (charac
 
     const updateInitialCharacters = useCallback((characters: CharacterResponse[]) => {
         setInitialCharacters(characters)
-    }, [])
+    }, [setInitialCharacters])
 
     return [filteredCharacters, updateInitialCharacters]
 }

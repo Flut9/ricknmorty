@@ -46,11 +46,11 @@ const CharactersList = ({ navigation }: Props) => {
 
         setLoading(false)
         setPageLoading(false)
-    }, [characters, searchText])
+    }, [characters, setLoading, setPageLoading, setCharacters, setPagesCount])
 
     const handleInputChanged = useCallback((text: string) => {
         setSearchText(text)
-    }, [searchText, characters])
+    }, [setSearchText])
 
     const handleScrollEnding = useCallback(() => {
         if (isPageLoading || page === pagesCount || searchText !== "") {
@@ -60,7 +60,7 @@ const CharactersList = ({ navigation }: Props) => {
         setPageLoading(true)
         setPage(page + 1)
         fetchCharacters(page + 1)
-    }, [page, isPageLoading, searchText, fetchCharacters])
+    }, [page, isPageLoading, searchText, fetchCharacters, setPage, setPageLoading])
 
     if (isLoading) {
         return <Loader />
