@@ -1,10 +1,18 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { FlatList, Pressable, StyleSheet, View, ActivityIndicator } from "react-native"
+import { 
+    FlatList, 
+    Pressable, 
+    StyleSheet, 
+    View, 
+    ActivityIndicator, 
+    ListRenderItemInfo,
+    KeyboardAvoidingView,
+    Platform
+} from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
 import { useCharacters } from "../hooks/useCharacters"
-import { useKeyboard } from "../hooks/useKeyboard"
 import { MainStackParams } from "../navigation/MainStack"
 import CharactersService from "../services/CharactersService"
 import { CharacterResponse } from "../types/CharactersResponse"
@@ -13,19 +21,18 @@ import Input from "../components/common/Input"
 import Spacer from "../components/common/Spacer"
 import Loader from "../components/common/Loader"
 
-import { colors } from "../assets/colors"
+import { colors } from "../shared/ui/theme/colors"
 
 type Props = NativeStackScreenProps<MainStackParams, "CharactersList">
 
 const CharactersList = ({ navigation }: Props) => {
     const [searchText, setSearchText] = useState("")
-    const [characters, setCharacters] = useCharacters(searchText)
+    const { characters, setCharacters } = useCharacters(searchText)
     const [page, setPage] = useState(1)
     const [pagesCount, setPagesCount] = useState(0)
     const [isLoading, setLoading] = useState(false)
     const [isPageLoading, setPageLoading] = useState(false)
     const safeAreaInsets = useSafeAreaInsets()
-    const keyboardHeight = useKeyboard()
 
     useEffect(() => {
         setupNavBar()
@@ -48,24 +55,24 @@ const CharactersList = ({ navigation }: Props) => {
         navigation.setOptions({ headerShown: false })
     }, [])
 
-    const getListItemComponent = useCallback((character: CharacterResponse) => {
+    const renderListItem = useCallback(({ item }: ListRenderItemInfo<CharacterResponse>) => {
         return (
             <Pressable 
-                onPress={() => navigation.navigate("CharacterInfo", { id: character.id, name: character.name })}
+                onPress={() => navigation.navigate("CharacterInfo", { id: item.id, name: item.name })}
             >
                 <CharacterRow 
-                    name={character.name}
-                    image={character.image} 
+                    name={item.name}
+                    image={item.image} 
                 />
             </Pressable>
         )
     }, [])
 
-    const getListSeparatorComponent = useCallback(() => {
+    const renderListSeparator = useCallback(() => {
         return <Spacer size={15} />
     }, [])
 
-    const getListFooterComponent = useCallback(() => {
+    const renderListFooter = useCallback(() => {
         return isPageLoading && page !== pagesCount
             ? (
                 <View style={styles.pageLoader}>
@@ -106,28 +113,28 @@ const CharactersList = ({ navigation }: Props) => {
     }
 
     return (
-        <View 
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={containerStyles}
         >
             <Input
                 value={searchText}
                 placeholder="Search..."
-                autoCapitalized="none"
+                autoCapitalize="none"
                 placeholderTextColor={colors.lightgray}
                 onChangeText={handleInputChanged} 
             />
             <FlatList
                 style={styles.list}
-                contentInset={{ bottom: keyboardHeight }}
                 data={characters}
-                renderItem={({ item }) => getListItemComponent(item)}
+                renderItem={renderListItem}
                 keyExtractor={item => String(item.id)}
                 showsVerticalScrollIndicator={false}
                 onEndReached={handleScrollEnding}
-                ListFooterComponent={getListFooterComponent}
-                ItemSeparatorComponent={getListSeparatorComponent}
+                ListFooterComponent={renderListFooter}
+                ItemSeparatorComponent={renderListSeparator}
             />
-        </View>
+        </KeyboardAvoidingView>
     )
 }
 

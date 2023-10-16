@@ -1,17 +1,10 @@
-import { View, StyleSheet, TextInput } from "react-native"
+import { View, StyleSheet, TextInput, TextInputProps } from "react-native"
 import { KeyboardTypeOptions } from "react-native/types"
 
-import SearchIcon from "../../assets/icons/SearchIcon"
-import { colors } from "../../assets/colors"
+import SearchIcon from "../../shared/ui/icons/SearchIcon"
+import { colors } from "../../shared/ui/theme/colors"
 
-type Props = {
-    value?: string,
-    placeholder?: string,
-    keyboardType?: KeyboardTypeOptions,
-    autoCapitalized?: "none" | "words" | "sentences" | "characters",
-    placeholderTextColor?: string, 
-    onChangeText: (text: string) => void
-}
+type Props = TextInputProps
 
 const Input = (props: Props) => {
     return (
@@ -27,7 +20,6 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: "row",
         alignItems: "center",
-        columnGap: 15,
         maxHeight: 45,
         paddingHorizontal: 15,
         backgroundColor: colors.backgroundSecondary,
@@ -35,7 +27,8 @@ const styles = StyleSheet.create({
     },
     textInput: {
         flex: 1,
-        color: colors.white
+        color: colors.white,
+        marginLeft: 15
     }
 })
 

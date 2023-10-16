@@ -30,3 +30,45 @@ export type CharacterResponse = {
     url: string,
     created: string
 }
+
+export type CharacterUI = {
+    image: string,
+    details: {
+        name: CharacterDetails,
+        species: CharacterDetails,
+        type: CharacterDetails,
+        originName: CharacterDetails,
+        locationName: CharacterDetails
+    }
+}
+
+export type CharacterDetails = {
+    title: string,
+    description: string
+}
+
+export const mapCharacterResponseToUI = (character: CharacterResponse): CharacterUI => ({
+    image: character.image,
+    details: {
+        name: {
+            title: "Name:",
+            description: character.name
+        },
+        species: {
+            title: "Species:",
+            description: character.species
+        },
+        type: {
+            title: "Type:",
+            description: character.type
+        },
+        originName: {
+            title: "Origin name:",
+            description: character.origin.name
+        },
+        locationName: {
+            title: "Location name:",
+            description: character.location.name
+        }
+    }
+})

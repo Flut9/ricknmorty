@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import CharactersList from "../screens/CharactersList"
 import CharacterInfo from "../screens/CharacterInfo"
 
-import { colors } from "../assets/colors"
+import { colors } from "../shared/ui/theme/colors"
 
 export type MainStackParams = {
     CharactersList: undefined,
@@ -13,9 +13,9 @@ export type MainStackParams = {
     }
 }
 
-const MainStack = () => {
-    const Stack = createNativeStackNavigator()
+const Stack = createNativeStackNavigator()
 
+const MainStack = () => {
     return (
         <Stack.Navigator
             screenOptions={{

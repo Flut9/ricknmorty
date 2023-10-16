@@ -1,6 +1,6 @@
 import { View, ActivityIndicator, StyleSheet } from "react-native"
 
-import { colors } from "../../assets/colors"
+import { colors } from "../../shared/ui/theme/colors"
 
 const Loader = () => {
     return (

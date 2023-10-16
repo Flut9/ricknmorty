@@ -2,7 +2,12 @@ import { useMemo, useState, useCallback } from "react"
 
 import { CharacterResponse } from "../types/CharactersResponse"
 
-export const useCharacters = (searchText: string): [CharacterResponse[], (characters: CharacterResponse[]) => void] => {
+type ReturnType = {
+    characters: CharacterResponse[],
+    setCharacters: (characters: CharacterResponse[]) => void
+}
+
+export const useCharacters = (searchText: string): ReturnType => {
     const [initialCharacters, setInitialCharacters] = useState<CharacterResponse[]>([])
 
     const filteredCharacters = useMemo(() => {
@@ -13,5 +18,8 @@ export const useCharacters = (searchText: string): [CharacterResponse[], (charac
         setInitialCharacters(characters)
     }, [setInitialCharacters])
 
-    return [filteredCharacters, updateInitialCharacters]
+    return {
+        characters: filteredCharacters,
+        setCharacters: updateInitialCharacters
+    }
 }

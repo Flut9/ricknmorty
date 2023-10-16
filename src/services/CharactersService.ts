@@ -1,11 +1,11 @@
-import axios from "axios"
+import { network } from "../network/network"
 
 import { CharactersResponse, CharacterResponse } from "../types/CharactersResponse"
 
 export default class CharactersService {
     static async getCharacters(page: number) {
         try {
-            return await axios.get<CharactersResponse>("https://rickandmortyapi.com/api/character", {
+            return await network.get<CharactersResponse>("/character", {
                 params: {
                     page
                 }
@@ -17,7 +17,7 @@ export default class CharactersService {
 
     static async getCharacter(id: number) {
         try {
-            return await axios.get<CharacterResponse>(`https://rickandmortyapi.com/api/character/${id}`)
+            return await network.get<CharacterResponse>(`/character/${id}`)
         } catch (error) {
             console.log(error)
         }
