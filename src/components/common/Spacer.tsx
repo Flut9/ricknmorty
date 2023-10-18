@@ -1,4 +1,19 @@
-import { View, StyleSheet } from "react-native"
+import styled, { css } from "styled-components/native"
+
+const SpacerView = styled.View<{ size: number, axis?: SpacerAxis }>`
+    ${props => {
+        switch (props.axis) {
+            case "vertical":
+                return css`
+                    height: ${props.size}px;
+                `
+            case "horizontal":
+                return css`
+                    width: ${props.size}px;
+                `
+        }
+    }}
+`
 
 type Props = {
     size: number,
@@ -9,12 +24,8 @@ type SpacerAxis = "vertical" | "horizontal"
 
 const Spacer = ({ size, axis = "vertical" }: Props) => {
     return (
-        <View style={getStyles(axis, size).spacer} />
+        <SpacerView size={size} axis={axis} />
     )
 }
-
-const getStyles = (axis: SpacerAxis, size: number) => StyleSheet.create({
-    spacer: axis === "vertical" ? { height: size } : { width: size }
-})
 
 export default Spacer

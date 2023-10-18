@@ -1,15 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { 
-    FlatList, 
+import {
     Pressable, 
-    StyleSheet, 
-    View, 
-    ActivityIndicator, 
-    ListRenderItemInfo,
-    KeyboardAvoidingView,
-    Platform
+    Platform,
+    FlatList,
+    ListRenderItemInfo
 } from "react-native"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
 import { useCharacters } from "../hooks/useCharacters"
@@ -21,7 +17,26 @@ import Input from "../components/common/Input"
 import Spacer from "../components/common/Spacer"
 import Loader from "../components/common/Loader"
 
+import styled from "styled-components/native"
 import { colors } from "../shared/ui/theme/colors"
+
+const KeyboardAvoidingView = styled.KeyboardAvoidingView<{ safeAreaInsets: EdgeInsets }>`
+    flex: 1;
+    background-color: ${colors.backgroundMain};
+    padding: 0 15px;
+    padding-top: ${props => props.safeAreaInsets.top}px;
+`
+
+const CharactersFlatList = styled.FlatList`
+    flex: 1;
+    margin-top: 35px;
+` as typeof FlatList
+
+const FooterLoaderView = styled.View`
+    padding: 30px 0;
+`
+
+const FooterLoaderActivityIndicator = styled.ActivityIndicator``
 
 type Props = NativeStackScreenProps<MainStackParams, "CharactersList">
 
@@ -39,17 +54,6 @@ const CharactersList = ({ navigation }: Props) => {
         setLoading(true)
         fetchCharacters(page)
     }, [])
-
-    const containerStyles = useMemo(() => {
-        return [
-            styles.container, 
-            { 
-                paddingTop: safeAreaInsets.top === 0 ? 15 : safeAreaInsets.top,
-                paddingLeft: safeAreaInsets.left === 0 ? 15 : safeAreaInsets.left,
-                paddingRight: safeAreaInsets.right === 0 ? 15 : safeAreaInsets.right
-            }
-        ]
-    }, [safeAreaInsets])
 
     const setupNavBar = useCallback(() => {
         navigation.setOptions({ headerShown: false })
@@ -75,9 +79,9 @@ const CharactersList = ({ navigation }: Props) => {
     const renderListFooter = useCallback(() => {
         return isPageLoading && page !== pagesCount
             ? (
-                <View style={styles.pageLoader}>
-                    <ActivityIndicator />
-                </View>
+                <FooterLoaderView>
+                    <FooterLoaderActivityIndicator />
+                </FooterLoaderView>
             )
             : null
     }, [isPageLoading, page, pagesCount])
@@ -114,8 +118,8 @@ const CharactersList = ({ navigation }: Props) => {
 
     return (
         <KeyboardAvoidingView
+            safeAreaInsets={safeAreaInsets}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={containerStyles}
         >
             <Input
                 value={searchText}
@@ -124,8 +128,7 @@ const CharactersList = ({ navigation }: Props) => {
                 placeholderTextColor={colors.lightgray}
                 onChangeText={handleInputChanged} 
             />
-            <FlatList
-                style={styles.list}
+            <CharactersFlatList
                 data={characters}
                 renderItem={renderListItem}
                 keyExtractor={item => String(item.id)}
@@ -137,19 +140,5 @@ const CharactersList = ({ navigation }: Props) => {
         </KeyboardAvoidingView>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundMain,
-        rowGap: 35
-    },
-    list: {
-        flex: 1
-    },
-    pageLoader: {
-        paddingVertical: 30
-    }
-})
 
 export default CharactersList

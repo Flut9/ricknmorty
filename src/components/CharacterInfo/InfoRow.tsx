@@ -1,6 +1,20 @@
-import { View, Text, StyleSheet } from "react-native"
-
+import styled from "styled-components/native"
 import { colors } from "../../shared/ui/theme/colors"
+
+const ContainerView = styled.View`
+    padding: 10px 0;
+`
+
+const TitleText = styled.Text`
+    color: ${colors.lightgray};
+    font-size: 14px;
+`
+
+const DetailsText = styled.Text`
+    color: ${colors.white};
+    font-size: 18px;
+    margin-top: 5px;
+`
 
 type Props = {
     title: string,
@@ -9,26 +23,11 @@ type Props = {
 
 const InfoRow = ({ title, details }: Props) => {
     return (
-        <View style={styles.container}>
-            <Text style={styles.titleText}>{title}</Text>
-            <Text style={styles.detailsText}>{details}</Text>
-        </View>
+        <ContainerView>
+            <TitleText>{title}</TitleText>
+            <DetailsText>{details}</DetailsText>
+        </ContainerView>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        rowGap: 5,
-        paddingVertical: 10
-    },
-    titleText: {
-        color: colors.lightgray,
-        fontSize: 14
-    },
-    detailsText: {
-        color: colors.white,
-        fontSize: 18
-    }
-})
 
 export default InfoRow

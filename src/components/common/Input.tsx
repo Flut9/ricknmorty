@@ -1,35 +1,34 @@
-import { View, StyleSheet, TextInput, TextInputProps } from "react-native"
-import { KeyboardTypeOptions } from "react-native/types"
+import { TextInputProps } from "react-native"
 
 import SearchIcon from "../../shared/ui/icons/SearchIcon"
+import styled from "styled-components/native"
 import { colors } from "../../shared/ui/theme/colors"
+
+const ContainerView = styled.View`
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    max-height: 45px;
+    padding: 0 15px;
+    background-color: ${colors.backgroundSecondary};
+    border-radius: 20px;
+`
+
+const TextInput = styled.TextInput`
+    flex: 1;
+    color: ${colors.white};
+    margin-left: 15px;
+`
 
 type Props = TextInputProps
 
 const Input = (props: Props) => {
     return (
-        <View style={styles.container}>
+        <ContainerView>
             <SearchIcon />
-            <TextInput style={styles.textInput} {...props} />
-        </View>
+            <TextInput {...props} />
+        </ContainerView>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: "row",
-        alignItems: "center",
-        maxHeight: 45,
-        paddingHorizontal: 15,
-        backgroundColor: colors.backgroundSecondary,
-        borderRadius: 20
-    },
-    textInput: {
-        flex: 1,
-        color: colors.white,
-        marginLeft: 15
-    }
-})
 
 export default Input
