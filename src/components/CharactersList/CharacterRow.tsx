@@ -8,6 +8,7 @@ const ContainerView = styled.View`
     padding: 15px;
     background-color: ${colors.backgroundSecondary};
     border-radius: 20px;
+    flex-shrink: 0;
 `
 
 const CharacterImage = styled.Image`
