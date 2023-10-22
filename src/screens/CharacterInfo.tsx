@@ -1,7 +1,8 @@
-import { useEffect, useCallback, useState } from "react"
+import { useEffect, useCallback } from "react"
 import { Pressable } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { useQuery } from "@tanstack/react-query"
 
 import { CharacterUI, mapCharacterResponseToUI } from "../types/CharactersResponse"
 import { MainStackParams } from "../navigation/MainStack"
@@ -32,27 +33,21 @@ const ScrollView = styled.ScrollView`
 type Props = NativeStackScreenProps<MainStackParams, "CharacterInfo">
 
 const CharacterInfo = ({ navigation, route }: Props) => {
-    const [character, setCharacter] = useState<CharacterUI>()
-    const [isLoading, setIsLoading] = useState(false)
     const { id, name } = route.params
     const safeAreaInsets = useSafeAreaInsets()
+    const { data, isLoading } = useQuery<any, any, CharacterUI>({
+        queryKey: ["character", id],
+        queryFn: () => fetchCharacter(),
+        select: ({data}) => mapCharacterResponseToUI(data)
+    })
 
     useEffect(() => {
         setupNavBar()
-        fetchCharacter()
     }, [])
 
     const fetchCharacter = useCallback(async () => {
-        setIsLoading(true)
-
-        let response = await CharactersService.getCharacter(id)
-
-        if (response?.data) {
-            setCharacter(mapCharacterResponseToUI(response.data))
-        }
-        
-        setIsLoading(false)
-    }, [setCharacter, setIsLoading])
+        return await CharactersService.getCharacter(id)
+    }, [])
 
     const setupNavBar = useCallback(() => {
         navigation.setOptions({
@@ -69,16 +64,16 @@ const CharacterInfo = ({ navigation, route }: Props) => {
         return <Loader />
     }
 
-    if (!character) {
+    if (!data) {
         return null
     }
 
     return (
         <ContainerView paddingBottom={safeAreaInsets.bottom}>
-            <CharacterImage source={{uri: character.image}} />
+            <CharacterImage source={{uri: data.image}} />
                             
             <ScrollView>
-                {Object.values(character.details).filter(item => item.description).map((item, index) => item.description && (
+                {Object.values(data.details).filter(item => item.description).map((item, index) => item.description && (
                     <InfoRow title={item.title} details={item.description} key={index.toString()} />
                 ))}
             </ScrollView>

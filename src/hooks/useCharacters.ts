@@ -1,25 +1,45 @@
-import { useMemo, useState, useCallback } from "react"
+import { useMemo, useCallback } from "react"
+import { useInfiniteQuery } from "@tanstack/react-query"
 
 import { CharacterResponse } from "../types/CharactersResponse"
+import CharactersService from "../services/CharactersService"
 
 type ReturnType = {
-    characters: CharacterResponse[],
-    setCharacters: (characters: CharacterResponse[]) => void
+    characters?: CharacterResponse[],
+    isLoading: boolean,
+    isFetching: boolean,
+    fetchNextPage: () => void
 }
 
 export const useCharacters = (searchText: string): ReturnType => {
-    const [initialCharacters, setInitialCharacters] = useState<CharacterResponse[]>([])
+    const {
+        data, 
+        isLoading, 
+        fetchNextPage,
+        isFetching
+    } = useInfiniteQuery<CharacterResponse[]>({
+        queryKey: ["character"],
+        queryFn: ({ pageParam }) => fetchCharacters(pageParam),
+        initialPageParam: 1,
+        getNextPageParam: (_, allPages) => {
+            return allPages.length + 1
+        },
+        maxPages: 42
+    })
+
+    const fetchCharacters = useCallback(async (page: number) => {
+        const response = await CharactersService.getCharacters(page)
+        return response.data.results
+    }, [])
 
     const filteredCharacters = useMemo(() => {
-        return initialCharacters.filter(item => item.name.toLowerCase().includes(searchText.toLowerCase()))
-    }, [searchText, initialCharacters])
-
-    const updateInitialCharacters = useCallback((characters: CharacterResponse[]) => {
-        setInitialCharacters(characters)
-    }, [setInitialCharacters])
+        return data?.pages.flat().filter(item => item.name.toLowerCase().includes(searchText.toLowerCase()))
+    }, [searchText, data])
 
     return {
         characters: filteredCharacters,
-        setCharacters: updateInitialCharacters
+        isLoading, 
+        isFetching,
+        fetchNextPage
     }
 }

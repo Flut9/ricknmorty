@@ -4,22 +4,14 @@ import { CharactersResponse, CharacterResponse } from "../types/CharactersRespon
 
 export default class CharactersService {
     static async getCharacters(page: number) {
-        try {
-            return await network.get<CharactersResponse>("/character", {
-                params: {
-                    page
-                }
-            })
-        } catch (error) {
-            console.log(error)
-        }
+        return await network.get<CharactersResponse>("/character", {
+            params: {
+                page
+            }
+        })
     }
 
     static async getCharacter(id: number) {
-        try {
-            return await network.get<CharacterResponse>(`/character/${id}`)
-        } catch (error) {
-            console.log(error)
-        }
+        return await network.get<CharacterResponse>(`/character/${id}`)
     }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
     Pressable, 
     Platform,
@@ -10,7 +10,6 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
 import { useCharacters } from "../hooks/useCharacters"
 import { MainStackParams } from "../navigation/MainStack"
-import CharactersService from "../services/CharactersService"
 import { CharacterResponse } from "../types/CharactersResponse"
 import CharacterRow from "../components/CharactersList/CharacterRow"
 import Input from "../components/common/Input"
@@ -42,17 +41,16 @@ type Props = NativeStackScreenProps<MainStackParams, "CharactersList">
 
 const CharactersList = ({ navigation }: Props) => {
     const [searchText, setSearchText] = useState("")
-    const { characters, setCharacters } = useCharacters(searchText)
-    const [page, setPage] = useState(1)
-    const [pagesCount, setPagesCount] = useState(0)
-    const [isLoading, setLoading] = useState(false)
-    const [isPageLoading, setPageLoading] = useState(false)
+    const {
+        characters,
+        isLoading,
+        isFetching,
+        fetchNextPage
+    } = useCharacters(searchText)
     const safeAreaInsets = useSafeAreaInsets()
 
     useEffect(() => {
         setupNavBar()
-        setLoading(true)
-        fetchCharacters(page)
     }, [])
 
     const setupNavBar = useCallback(() => {
@@ -77,43 +75,37 @@ const CharactersList = ({ navigation }: Props) => {
     }, [])
 
     const renderListFooter = useCallback(() => {
-        return isPageLoading && page !== pagesCount
+        return isFetching
             ? (
                 <FooterLoaderView>
                     <FooterLoaderActivityIndicator />
                 </FooterLoaderView>
             )
             : null
-    }, [isPageLoading, page, pagesCount])
+    }, [isFetching])
 
-    const fetchCharacters = useCallback(async (page: number) => {
-        let response = await CharactersService.getCharacters(page)
-
-        if (response?.data) {
-            setCharacters([...characters, ...response.data.results])
-            setPagesCount(response.data.info.pages)
-        }
-
-        setLoading(false)
-        setPageLoading(false)
-    }, [characters, setLoading, setPageLoading, setCharacters, setPagesCount])
+    const getKeyExtractor = useCallback((character: CharacterResponse) => {
+        return String(character.id)
+    }, [])
 
     const handleInputChanged = useCallback((text: string) => {
         setSearchText(text)
     }, [setSearchText])
 
     const handleScrollEnding = useCallback(() => {
-        if (isPageLoading || page === pagesCount || searchText !== "") {
+        if (searchText || isLoading || isFetching) {
             return
         }
 
-        setPageLoading(true)
-        setPage(page + 1)
-        fetchCharacters(page + 1)
-    }, [page, isPageLoading, searchText, fetchCharacters, setPage, setPageLoading])
-
+        fetchNextPage()
+    }, [searchText, isLoading, isFetching, fetchNextPage])
+    
     if (isLoading) {
         return <Loader />
+    }
+
+    if (!characters) {
+        return null
     }
 
     return (
@@ -131,7 +123,7 @@ const CharactersList = ({ navigation }: Props) => {
             <CharactersFlatList
                 data={characters}
                 renderItem={renderListItem}
-                keyExtractor={item => String(item.id)}
+                keyExtractor={getKeyExtractor}
                 showsVerticalScrollIndicator={false}
                 onEndReached={handleScrollEnding}
                 ListFooterComponent={renderListFooter}
