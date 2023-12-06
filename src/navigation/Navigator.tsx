@@ -1,11 +1,15 @@
 import { NavigationContainer } from "@react-navigation/native"
-
-import MainStack from "./MainStack"
+import { useStore } from "effector-react"
+import { $isAuth } from "../screens/store"
+import { AuthNavigator } from "./AuthNavigator"
+import { BottomTabNavigator } from "./BottomTabNavigator"
 
 const Navigator = () => {
+    const isAuth = useStore($isAuth)
+
     return (
         <NavigationContainer>
-            <MainStack />
+            {isAuth ? <BottomTabNavigator /> : <AuthNavigator />}
         </NavigationContainer>
     )
 }

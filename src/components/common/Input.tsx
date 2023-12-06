@@ -1,33 +1,26 @@
 import { TextInputProps } from "react-native"
-
-import SearchIcon from "../../shared/ui/icons/SearchIcon"
 import styled from "styled-components/native"
 import { colors } from "../../shared/ui/theme/colors"
 
-const ContainerView = styled.View`
-    flex: 1;
-    flex-direction: row;
-    align-items: center;
-    max-height: 45px;
-    padding: 0 15px;
-    background-color: ${colors.backgroundSecondary};
-    border-radius: 20px;
+const Wrapper = styled.View<{ isEditing: boolean }>`
+    height: 48px;
+    border-bottom-width: 1px;
+    border-bottom-color: ${({ isEditing }) => isEditing ? colors.white : colors.lightgray};
 `
 
-const TextInput = styled.TextInput`
+const TextInput = styled.TextInput<{ isEditing: boolean }>`
     flex: 1;
-    color: ${colors.white};
-    margin-left: 15px;
+    color: ${({ isEditing }) => isEditing ? colors.white : colors.lightgray};
+    font-size: 16px;
 `
 
 type Props = TextInputProps
 
 const Input = (props: Props) => {
     return (
-        <ContainerView>
-            <SearchIcon />
-            <TextInput {...props} />
-        </ContainerView>
+        <Wrapper isEditing={props.editable ?? true}>
+            <TextInput isEditing={props.editable ?? true} {...props} />
+        </Wrapper>
     )
 }
 

@@ -13,6 +13,7 @@ import Loader from "../components/common/Loader"
 import ChevronLeftIcon from "../shared/ui/icons/ChevronLeftIcon"
 import styled from "styled-components/native"
 import { colors } from "../shared/ui/theme/colors"
+import { ThemeContext } from "./App"
 
 const ContainerView = styled.View<{ paddingBottom: number }>`
     flex: 1;
